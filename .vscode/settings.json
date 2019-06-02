@@ -1,0 +1,10 @@
+{
+  "editor.fontFamily": "'IBM Plex Mono', Menlo, Monaco, 'Courier New', monospace",
+  "editor.fontSize": 13,
+  "editor.fontWeight": "600",
+  "peacock.affectedSettings": ["statusBar"],
+  "workbench.colorCustomizations": {
+    "statusBar.background": "#00b3e6",
+    "statusBar.foreground": "#FFFFFF"
+  }
+}

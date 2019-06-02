@@ -179,6 +179,47 @@ module.exports = ({
     ) {
       obliqueObjectPrefix = "mi";
     }
+    // "bi" does not appear with dimensional prefixes and "ba"
+    if (
+      obliqueObject === "thirdSingularInanimate" &&
+      dimensionalPrefix[0].prefix.length > 0
+    ) {
+      notes.push(
+        `Oblique object "bi" does not appear with dimensional prefixes.`
+      );
+    }
+    // "bi", "ri", "nni" are never found with the indirect-object prefixes
+    // and the prefixes "da", "ta", "shi", "e", and "ni"
+    if (
+      obliqueObject === "secondSingular" ||
+      obliqueObject === "thirdSingularAnimate" ||
+      obliqueObject === "thirdSingularInanimate"
+    ) {
+      if (
+        dimensionalPrefix[0].prefix &&
+        dimensionalPrefixes.hasOwnProperty(dimensionalPrefix[0].prefix)
+      ) {
+        notes.push(
+          `"bi" / "ri" / "nni" are never found with the prefixes "da", "ta", "shi", "e", and "ni".`
+        );
+      }
+
+      if (indirectObject.length > 0) {
+        notes.push(
+          `"bi" / "ri" / "nni" are never found with the indirect-object prefixes.`
+        );
+      }
+    }
+    // "bi" does not appear with "ba"
+    if (
+      obliqueObject === "thirdSingularInanimate" &&
+      indirectObject === "thirdSingularInanimate"
+    ) {
+      notes.push(
+        `Oblique object "bi" does not appear with indirect object prefix "ba".`
+      );
+    }
+
     conjugatedVerb = obliqueObjectPrefix + conjugatedVerb;
     rawAffixes.push([
       "oblique object prefix",

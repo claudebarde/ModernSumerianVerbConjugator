@@ -63,7 +63,7 @@ console.log(
     directObject: "thirdSingularInanimate",
     obliqueObject: "thirdSingularInanimate",
     dimensionalPrefix: [{ prefix: "", initialPersonPrefix: "" }],
-    indirectObject: "secondSingular",
+    indirectObject: "",
     ventive: true,
     preformative: "i",
     proclitic: ""

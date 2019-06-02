@@ -53,11 +53,12 @@ module.exports = ({
       // if last letter is consonant
       conjugatedVerb = stem + personalSuffixes2[subject];
       // saves affixes
-      rawAffixes.push([
-        "intransitive suffix subject",
-        personalSuffixes2[subject]
-      ]);
-      affixes.push(["intransitive suffix subject", personalSuffixes2[subject]]);
+      affixes.push({
+        type: "suffix",
+        function: "intransitive subject",
+        rawForm: "personalSuffixes2[subject]",
+        form: personalSuffixes2[subject]
+      });
     } else {
       // if last letter is vowel
       // if suffix starts with "e"
@@ -65,11 +66,12 @@ module.exports = ({
         const personalSuffix = personalSuffixes2[subject].slice(1);
         conjugatedVerb = stem + personalSuffix;
         // saves affixes
-        rawAffixes.push([
-          "intransitive suffix subject",
-          personalSuffixes2[subject]
-        ]);
-        affixes.push(["intransitive suffix subject", personalSuffix]);
+        affixes.push({
+          type: "suffix",
+          function: "intransitive subject",
+          rawForm: personalSuffixes2[subject],
+          form: personalSuffix
+        });
         notes.push(
           `${personalSuffixes2[subject]} becomes ${personalSuffix} after vowel.`
         );
@@ -96,13 +98,19 @@ module.exports = ({
       }
       conjugatedVerb = personalPrefix + stem + personalSuffix;
       // saves affixes
-      rawAffixes.push(
-        ["transitive subject prefix", personalPrefix],
-        ["transitive direct object suffix", personalSuffixes2[directObject]]
-      );
       affixes.push(
-        ["transitive subject prefix", personalPrefix],
-        ["transitive direct object suffix", personalSuffix]
+        {
+          type: "prefix",
+          function: "transitive subject",
+          rawForm: personalPrefix,
+          form: personalPrefix
+        },
+        {
+          type: "suffix",
+          function: "transitive direct object",
+          rawForm: personalSuffixes2[directObject],
+          form: personalSuffix
+        }
       );
     } else if (aspect === "imperfective") {
       // adds prefixes and suffixes
@@ -153,13 +161,19 @@ module.exports = ({
 
       conjugatedVerb = directObjectPrefix + stem + personalSuffix;
       // saves affixes
-      rawAffixes.push(
-        ["transitive direct object prefix", personalPrefixes[directObject]],
-        ["transitive subject suffix", personalSuffixes2[subject]]
-      );
       affixes.push(
-        ["transitive direct object prefix", personalPrefix],
-        ["transitive subject suffix", personalSuffix]
+        {
+          type: "prefix",
+          function: "transitive direct object",
+          rawForm: personalPrefixes[directObject],
+          form: personalPrefix
+        },
+        {
+          type: "suffix",
+          function: "transitive subject",
+          rawForm: personalSuffixes2[subject],
+          form: personalSuffix
+        }
       );
     }
   }
@@ -221,11 +235,13 @@ module.exports = ({
     }
 
     conjugatedVerb = obliqueObjectPrefix + conjugatedVerb;
-    rawAffixes.push([
-      "oblique object prefix",
-      obliqueObjectPrefixes[obliqueObject]
-    ]);
-    affixes.push(["oblique object prefix", obliqueObjectPrefix]);
+    // saves affixes
+    affixes.push({
+      type: "prefix",
+      function: "oblique object",
+      rawForm: obliqueObjectPrefixes[obliqueObject],
+      form: obliqueObjectPrefix
+    });
   }
 
   /*
@@ -258,13 +274,19 @@ module.exports = ({
       }
       conjugatedVerb = ipprefix + dimensionalPrefixes[prefix] + conjugatedVerb;
       // saves affixes
-      rawAffixes.push(
-        ["dimensional prefix", dimensionalPrefixes[prefix]],
-        ["initial person prefix", initialPersonPrefixes[initialPersonPrefix]]
-      );
       affixes.push(
-        ["dimensional prefix", dimensionalPrefixes[prefix]],
-        ["initial person prefix", ipprefix]
+        {
+          type: "prefix",
+          function: "dimensional prefix",
+          rawForm: dimensionalPrefixes[prefix],
+          form: dimensionalPrefixes[prefix]
+        },
+        {
+          type: "prefix",
+          function: "initial person prefix",
+          rawForm: initialPersonPrefixes[initialPersonPrefix],
+          form: ipprefix
+        }
       );
     });
   }
@@ -281,11 +303,13 @@ module.exports = ({
     }
 
     conjugatedVerb = indirectObjectPrefix + conjugatedVerb;
-    rawAffixes.push([
-      "indirect object prefix",
-      indirectObjectPrefixes[indirectObject]
-    ]);
-    affixes.push(["indirect object prefix", indirectObjectPrefix]);
+    // saves affixes
+    affixes.push({
+      type: "prefix",
+      function: "indirect object",
+      rawForm: indirectObjectPrefixes[indirectObject],
+      form: indirectObjectPrefix
+    });
   }
 
   /*
@@ -318,8 +342,13 @@ module.exports = ({
       ventivePrefix = "m";
     }
     conjugatedVerb = ventivePrefix + conjugatedVerb;
-    rawAffixes.push(["ventive", "mu"]);
-    affixes.push(["ventive", ventivePrefix]);
+    //saves affixes
+    affixes.push({
+      type: "prefix",
+      function: "ventive",
+      rawForm: "mu",
+      form: ventivePrefix
+    });
   }
 
   /*
@@ -343,20 +372,32 @@ module.exports = ({
       if (preformative === "i") {
         conjugatedVerb = "i" + conjugatedVerb;
         // saves affixes
-        rawAffixes.push({ preformative: "i" });
-        affixes.push({ preformative: "i" });
+        affixes.push({
+          type: "prefix",
+          function: "preformative",
+          rawForm: "i",
+          form: "i"
+        });
       } else if (preformative === "a") {
         conjugatedVerb = "al" + conjugatedVerb;
         notes.push(`Preformative "a" becomes "al" just before the verb stem.`);
         // saves affixes
-        rawAffixes.push({ preformative: "a" });
-        affixes.push({ preformative: "al" });
+        affixes.push({
+          type: "prefix",
+          function: "preformative",
+          rawForm: "a",
+          form: "al"
+        });
       } else if (preformative === "u") {
         conjugatedVerb = "ul" + conjugatedVerb;
         notes.push(`Preformative "u" becomes "ul" just before the verb stem.`);
         // saves affixes
-        rawAffixes.push({ preformative: "u" });
-        affixes.push({ preformative: "ul" });
+        affixes.push({
+          type: "prefix",
+          function: "preformative",
+          rawForm: "u",
+          form: "ul"
+        });
       }
     } else {
       if (preformative === "i") {
@@ -372,8 +413,12 @@ module.exports = ({
           conjugatedVerb = "i" + conjugatedVerb;
         }
         // saves affixes
-        rawAffixes.push({ preformative: "i" });
-        affixes.push({ preformative: "i" });
+        affixes.push({
+          type: "prefix",
+          function: "preformative",
+          rawForm: "i",
+          form: "i"
+        });
       } else if (preformative === "a") {
         // a is never found before CV
         if (
@@ -387,8 +432,12 @@ module.exports = ({
           conjugatedVerb = "a" + conjugatedVerb;
         }
         // saves affixes
-        rawAffixes.push({ preformative: "a" });
-        affixes.push({ preformative: "a" });
+        affixes.push({
+          type: "prefix",
+          function: "preformative",
+          rawForm: "a",
+          form: "a"
+        });
       } else if (preformative === "u") {
         if (aspect !== perfective) {
           notes.push(`"u" only appears in perfective forms.`);
@@ -396,8 +445,12 @@ module.exports = ({
           conjugatedVerb = "u" + conjugatedVerb;
         }
         // saves affixes
-        rawAffixes.push({ preformative: "u" });
-        affixes.push({ preformative: "u" });
+        affixes.push({
+          type: "prefix",
+          function: "preformative",
+          rawForm: "u",
+          form: "u"
+        });
       }
     }
   } else if (preformative.length === 0 && ventive) {
@@ -405,22 +458,30 @@ module.exports = ({
   } else if (preformative.length > 0 && ventive) {
     // preformative and ventive
     const ventiveForm = affixes.find(item => item[0] === "ventive");
+    let preformativePrefix = preformative;
     if (
       ventiveForm &&
       ventiveForm[1] === "mu" &&
       (preformative === "a" || preformative === "i")
     ) {
-      preformative = "";
+      preformativePrefix = "";
       notes.push(`Preformatives "i" and "a" do not appear before "mu".`);
     } else if (ventiveForm && ventiveForm[1] === "m") {
       // the loss of "u" lengthens the preceding vowel
-      preformative = preformative + preformative;
+      preformativePrefix = preformative + preformative;
       notes.push(
         `The loss of "u" in the ventive lengthens the preceding vowel.`
       );
     }
+
     conjugatedVerb = preformative + conjugatedVerb;
+    affixes.push({
+      type: "prefix",
+      function: "preformative",
+      rawForm: preformative,
+      form: preformativePrefix
+    });
   }
 
-  return { conjugatedVerb, rawAffixes, affixes, notes };
+  return { conjugatedVerb, affixes, notes };
 };

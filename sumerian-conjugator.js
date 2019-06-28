@@ -18,6 +18,8 @@ const {
   indirectObjectPrefixes
 } = require("./personalPrefixesAndSuffixes/indirectObjectPrefixes");
 
+const syllableParser = require("./syllableParser");
+
 const VOWELS = ["a", "e", "i", "u"];
 
 // checks if vowel of suffix will contract
@@ -332,7 +334,7 @@ module.exports = ({
             // preformative will change according to preceding proclitic
             if (proclitic === "nu") {
               ipprefix = "u";
-            } else if (proclitic === "kha") {
+            } else if (proclitic === "ha") {
               ipprefix = "a";
             }
           } else {
@@ -412,7 +414,8 @@ module.exports = ({
       indirectObject !== "secondPlural" &&
       indirectObject !== "thirdPersonInanimate" &&
       dimensionalPrefix[0].prefix !== "in" &&
-      obliqueObject !== "secondSingular"
+      obliqueObject !== "secondSingular" &&
+      (proclitic || preformative)
     ) {
       ventivePrefix = "m";
       notes.push(`Ventive prefix contracts to "m" before /CV/ cluster.`);
@@ -424,9 +427,11 @@ module.exports = ({
     ) {
       // "bi" assimilates with ventive to "mmi"
       ventivePrefix = "m";
+      notes.push(`"bi" assimilates with ventive to "mmi".`);
     } else if (indirectObject === "thirdPersonInanimate") {
       // "ba" assimilates with ventive to "mma"
       ventivePrefix = "m";
+      notes.push(`"ba" assimilates with ventive to "mma".`);
     }
     conjugatedVerb = ventivePrefix + conjugatedVerb;
     //saves affixes
@@ -494,6 +499,7 @@ module.exports = ({
           !VOWELS.includes(conjugatedVerb[0]) &&
           VOWELS.includes(conjugatedVerb[1])
         ) {
+          preformative = "";
           notes.push(
             `Preformative "i" is never found before a prefix that consists of a consonant and a vowel.`
           );
@@ -505,7 +511,7 @@ module.exports = ({
           type: "prefix",
           function: "preformative",
           rawForm: "i",
-          form: "i"
+          form: preformative
         });
       } else if (preformative === "a") {
         // a is never found before CV
@@ -542,8 +548,8 @@ module.exports = ({
         });
       }
     }
-  } else if (!preformative && ventive) {
-    // no preformative but ventive
+  } else if (!preformative && !proclitic && ventive) {
+    // no preformative, no proclitic but ventive
     // contracted ventive must be prefixed with preformative
     if (
       affixes.findIndex(
@@ -625,13 +631,13 @@ module.exports = ({
         newProclitic = "nu";
       }
     }
-    // KHA
-    else if (proclitic === "kha") {
+    // HA
+    else if (proclitic === "ha") {
       if (conjugatedVerb[0] === "i") {
-        newProclitic = "khe";
+        newProclitic = "he";
         conjugatedVerb = conjugatedVerb.slice(1);
         notes.push(
-          `Initial "i" assimilates to proclitic "kha" which becomes "khe".`
+          `Initial "i" assimilates to proclitic "ha" which becomes "he".`
         );
         // modifies preformative entry in array because of "i" being assimilated
         affixes = affixes.map(entry => {
@@ -642,7 +648,7 @@ module.exports = ({
           return entry;
         });
       } else {
-        newProclitic = "kha";
+        newProclitic = "ha";
       }
     }
     // NAN
@@ -683,6 +689,8 @@ module.exports = ({
       form: newProclitic
     });
   }
+  // parse final verb for syllables
+  const syllables = syllableParser(conjugatedVerb, stem);
 
-  return { conjugatedVerb, affixes, notes };
+  return { conjugatedVerb, affixes, notes, syllables };
 };

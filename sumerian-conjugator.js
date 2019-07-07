@@ -17,8 +17,10 @@ const {
 const {
   indirectObjectPrefixes
 } = require("./personalPrefixesAndSuffixes/indirectObjectPrefixes");
-
+// imports syllable parser
 const syllableParser = require("./syllableParser");
+// imports cuneiform writer
+const writeCuneiforms = require("./writeCuneiforms");
 
 const VOWELS = ["a", "e", "i", "u"];
 
@@ -29,7 +31,32 @@ const willSuffixVowelContract = (stem, suffix) => {
   return false;
 };
 
+// make necessary phological changes to reduplicate stems
+const reduplicateStem = (stem, aspect) => {
+  const reducedStems = ["naĝ"];
+  // reduces stems if necessary
+  if (reducedStems.includes(stem) && aspect === "perfective") {
+    return `${stem.slice(0, -1)}-${stem.slice(0, -1)}`;
+  }
+  // reduplicate stem before adding
+  if (aspect === "imperfective") {
+    if (stem.slice(-2).toLowerCase() === "ed") {
+      // case "aked"
+      return `${stem.slice(0, -2)}-${stem}`;
+    } else if (stem.slice(-2).toLowerCase() === "ud" && stem.length > 3) {
+      // case "shumud"
+      return `${stem.slice(0, -2)}-${stem}`;
+    } else if (stem.slice(-2).toLowerCase() === "ud" && stem.length === 3) {
+      // case "gud"
+      return `${stem.slice(0, -1)}-${stem}`;
+    }
+  }
+
+  return `${stem}-${stem}`;
+};
+
 module.exports = ({
+  verbID,
   stem,
   aspect,
   transitive,
@@ -40,8 +67,10 @@ module.exports = ({
   initialPersonPrefix,
   indirectObject,
   ventive,
+  middleMarker,
   preformative,
-  proclitic
+  proclitic,
+  reduplicated
 }) => {
   // initializes empty results
   let conjugatedVerb = "";
@@ -58,6 +87,9 @@ module.exports = ({
   ) {
     return;
   }
+
+  // reduplicates verbal stem
+  if (reduplicated && aspect) stem = reduplicateStem(stem, aspect);
 
   if (transitive !== true) {
     if (!willSuffixVowelContract(stem, personalSuffixes2[subject])) {
@@ -325,6 +357,9 @@ module.exports = ({
           } else {
             ipprefix = "";
           }
+        } else if (middleMarker) {
+          // in case of ventive prefix
+          ipprefix = "a";
         } else if (ventive) {
           // in case of ventive prefix
           ipprefix = "u";
@@ -382,6 +417,24 @@ module.exports = ({
   }
 
   /*
+        MIDDLE MARKER
+  */
+  let middleMarkerPrefix = "ba";
+  if (middleMarker) {
+    // cannot occur with thrid person singular inanimate indirect object
+    if (
+      indirectObject === "thirdSingularInanimate" ||
+      indirectObject === "thirdPluralInanimate"
+    ) {
+      indirectObject = undefined;
+    }
+    // "ba" assimilates with ventive to "mma"
+    if (ventive) {
+      middleMarkerPrefix = "ma";
+    }
+  }
+
+  /*
         INDIRECT OBJECT PREFIXES
   */
   if (indirectObject && indirectObject.length > 0) {
@@ -402,6 +455,21 @@ module.exports = ({
   }
 
   /*
+    MIDDLE MARKER OCCURS BETWEEH INDIRECT OBJECT AND VENTIVE
+    BUT INFLUENCES INDIRECT OBJECT FORM
+  */
+  if (middleMarker) {
+    conjugatedVerb = middleMarkerPrefix + conjugatedVerb;
+    // saves affixes
+    affixes.push({
+      type: "prefix",
+      function: "middle marker",
+      rawForm: "ba",
+      form: middleMarkerPrefix
+    });
+  }
+
+  /*
         VENTIVE
   */
   if (ventive) {
@@ -415,6 +483,7 @@ module.exports = ({
       indirectObject !== "thirdPersonInanimate" &&
       dimensionalPrefix[0].prefix !== "in" &&
       obliqueObject !== "secondSingular" &&
+      !middleMarker &&
       (proclitic || preformative)
     ) {
       ventivePrefix = "m";
@@ -432,6 +501,20 @@ module.exports = ({
       // "ba" assimilates with ventive to "mma"
       ventivePrefix = "m";
       notes.push(`"ba" assimilates with ventive to "mma".`);
+    } else if (middleMarker) {
+      // "ba" assimilates with ventive to "mma"
+      ventivePrefix = "m";
+      affixes = affixes.map(item => {
+        if (item.function === "middle marker") {
+          item.form = "ma";
+        }
+
+        return item;
+      });
+      notes.push(
+        `Ventive prefix contracts to "m" before /CV/ cluster.`,
+        `"ba" assimilates with ventive to "mma".`
+      );
     }
     conjugatedVerb = ventivePrefix + conjugatedVerb;
     //saves affixes
@@ -501,7 +584,7 @@ module.exports = ({
         ) {
           preformative = "";
           notes.push(
-            `Preformative "i" is never found before a prefix that consists of a consonant and a vowel.`
+            `Preformative "i" is never found before a syllable that consists of a consonant and a vowel.`
           );
         } else {
           conjugatedVerb = "i" + conjugatedVerb;
@@ -691,6 +774,16 @@ module.exports = ({
   }
   // parse final verb for syllables
   const syllables = syllableParser(conjugatedVerb, stem);
+  // removes dash for reduplicated stems
+  conjugatedVerb = conjugatedVerb.replace("-", "");
+  // writes verb in cuneiforms
+  const cuneiforms = writeCuneiforms({
+    affixes: syllables,
+    reduplicated,
+    aspect,
+    verbID,
+    stem
+  });
 
-  return { conjugatedVerb, affixes, notes, syllables };
+  return { conjugatedVerb, stem, affixes, notes, syllables, cuneiforms };
 };

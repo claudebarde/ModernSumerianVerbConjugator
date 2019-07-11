@@ -141,10 +141,6 @@ const syllableParser = (verb, stem) => {
       result = returnSyllables(["CV", "V"], prefixes);
       syllables.push(result);
       break;
-    case "VCC":
-      result = returnSyllables(["VC", "C"], prefixes);
-      syllables.push(result);
-      break;
     case "CVC":
       result = returnSyllables(["CVC"], prefixes);
       syllables.push(result);
@@ -167,6 +163,10 @@ const syllableParser = (verb, stem) => {
       break;
     case "CVCVC":
       result = returnSyllables(["CV", "CVC"], prefixes);
+      syllables.push(result);
+      break;
+    case "CVVCV":
+      result = returnSyllables(["CV", "V", "VC"], prefixes);
       syllables.push(result);
       break;
     case "CVCCV":
@@ -201,10 +201,6 @@ const syllableParser = (verb, stem) => {
       result = returnSyllables(["CV", "VC", "CV", "V"], prefixes);
       syllables.push(result);
       break;
-    case "VCVVCVC":
-      result = returnSyllables(["V", "CV", "V", "CVC"], prefixes);
-      syllables.push(result);
-      break;
     // starts with vowel
     case "V":
       syllables.push(prefixes);
@@ -214,6 +210,10 @@ const syllableParser = (verb, stem) => {
       break;
     case "VCV":
       result = returnSyllables(["V", "CV"], prefixes);
+      syllables.push(result);
+      break;
+    case "VCC":
+      result = returnSyllables(["VC", "C"], prefixes);
       syllables.push(result);
       break;
     case "VCVV":
@@ -238,6 +238,14 @@ const syllableParser = (verb, stem) => {
       break;
     case "VCVCVV":
       result = returnSyllables(["V", "CV", "CV", "V"], prefixes);
+      syllables.push(result);
+      break;
+    case "VCVVCV":
+      result = returnSyllables(["V", "CV", "V", "CV"], prefixes);
+      syllables.push(result);
+      break;
+    case "VCVVCVC":
+      result = returnSyllables(["V", "CV", "V", "CVC"], prefixes);
       syllables.push(result);
       break;
     case "VCCVVCV":

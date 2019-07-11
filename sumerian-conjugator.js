@@ -21,8 +21,9 @@ const {
 const syllableParser = require("./syllableParser");
 // imports cuneiform writer
 const writeCuneiforms = require("./writeCuneiforms");
+const defaultVerbs = require("./defaultVerbs");
 
-const VOWELS = ["a", "e", "i", "u"];
+const VOWELS = ["a", "e", "i", "u", "'"];
 
 // checks if vowel of suffix will contract
 const willSuffixVowelContract = (stem, suffix) => {
@@ -782,7 +783,8 @@ module.exports = ({
     reduplicated,
     aspect,
     verbID,
-    stem
+    stem,
+    defaultVerbs
   });
 
   return { conjugatedVerb, stem, affixes, notes, syllables, cuneiforms };

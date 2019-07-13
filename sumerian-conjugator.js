@@ -21,7 +21,6 @@ const {
 const syllableParser = require("./syllableParser");
 // imports cuneiform writer
 const writeCuneiforms = require("./writeCuneiforms");
-const defaultVerbs = require("./defaultVerbs");
 
 const VOWELS = ["a", "e", "i", "u", "'"];
 
@@ -33,27 +32,30 @@ const willSuffixVowelContract = (stem, suffix) => {
 };
 
 // make necessary phological changes to reduplicate stems
-const reduplicateStem = (stem, aspect) => {
-  const reducedStems = ["naĝ"];
-  // reduces stems if necessary
-  if (reducedStems.includes(stem) && aspect === "perfective") {
-    return `${stem.slice(0, -1)}-${stem.slice(0, -1)}`;
-  }
-  // reduplicate stem before adding
-  if (aspect === "imperfective") {
-    if (stem.slice(-2).toLowerCase() === "ed") {
-      // case "aked"
-      return `${stem.slice(0, -2)}-${stem}`;
-    } else if (stem.slice(-2).toLowerCase() === "ud" && stem.length > 3) {
-      // case "shumud"
-      return `${stem.slice(0, -2)}-${stem}`;
-    } else if (stem.slice(-2).toLowerCase() === "ud" && stem.length === 3) {
-      // case "gud"
-      return `${stem.slice(0, -1)}-${stem}`;
+const reduplicateStem = (stem, aspect, defaultVerbs, verbID) => {
+  let reduplicatedStem;
+  // we find the verb we need
+  const _verb = defaultVerbs.filter(verb => verb.id === verbID);
+  if (!_verb[0]) return undefined;
+  const verb = _verb[0];
+  // finds or creates reduplicated stem
+  if (verb.hasOwnProperty("reduplicated")) {
+    if (aspect === "perfective") {
+      reduplicatedStem = verb.reduplicated.form;
+    } else {
+      reduplicatedStem = `${verb.reduplicated.form.split("-")[0]}-${
+        verb.imperfective.form
+      }`;
+    }
+  } else {
+    if (aspect === "perfective") {
+      reduplicatedStem = `${verb.value}-${verb.value}`;
+    } else {
+      reduplicatedStem = `${verb.value}-${verb.imperfective.form}`;
     }
   }
 
-  return `${stem}-${stem}`;
+  return reduplicatedStem;
 };
 
 module.exports = ({
@@ -71,7 +73,8 @@ module.exports = ({
   middleMarker,
   preformative,
   proclitic,
-  reduplicated
+  reduplicated,
+  defaultVerbs
 }) => {
   // initializes empty results
   let conjugatedVerb = "";
@@ -90,7 +93,9 @@ module.exports = ({
   }
 
   // reduplicates verbal stem
-  if (reduplicated && aspect) stem = reduplicateStem(stem, aspect);
+  if (reduplicated && aspect && defaultVerbs && verbID) {
+    stem = reduplicateStem(stem, aspect, defaultVerbs, verbID);
+  }
 
   if (transitive !== true) {
     if (!willSuffixVowelContract(stem, personalSuffixes2[subject])) {
@@ -255,11 +260,11 @@ module.exports = ({
       }
 
       conjugatedVerb = personalPrefix + stem + personalSuffix;
-      // saves affixes
+      // saves sufix
       affixes.push({
         type: "suffix",
         function: "transitive subject",
-        rawForm: personalSuffixes2[subject],
+        rawForm: personalSuffixes1[subject],
         form: personalSuffix
       });
     }
@@ -618,11 +623,7 @@ module.exports = ({
           form: preformative
         });
       } else if (preformative === "u") {
-        if (aspect !== "perfective") {
-          notes.push(`Preformative "u" only appears in perfective forms.`);
-        } else {
-          conjugatedVerb = "u" + conjugatedVerb;
-        }
+        conjugatedVerb = "u" + conjugatedVerb;
         // saves affixes
         affixes.push({
           type: "prefix",
@@ -668,6 +669,10 @@ module.exports = ({
       rawForm: preformative,
       form: preformativePrefix
     });
+  }
+  // "u" is generally found with verbs in perfective
+  if (preformative === "u" && aspect === "imperfective") {
+    notes.push(`Preformative "u" only appears in perfective forms.`);
   }
 
   /*

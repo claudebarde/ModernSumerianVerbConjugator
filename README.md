@@ -26,7 +26,6 @@ const verb = conjugator({
   directObject,
   obliqueObject,
   dimensionalPrefix,
-  initialPersonPrefix,
   indirectObject,
   ventive,
   middleMarker,

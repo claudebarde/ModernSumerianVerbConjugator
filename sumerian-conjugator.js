@@ -1,4 +1,4 @@
-// imports personal prefixes and suffixes
+// imports personal prefixes and suffixes from files
 const {
   personalSuffixes1,
   personalSuffixes2,
@@ -67,7 +67,6 @@ module.exports = ({
   directObject,
   obliqueObject,
   dimensionalPrefix,
-  initialPersonPrefix,
   indirectObject,
   ventive,
   middleMarker,
@@ -150,6 +149,8 @@ module.exports = ({
           } else if (indirectObject) {
             const indirectPrefix = indirectObjectPrefixes[indirectObject];
             personalPrefix = indirectPrefix[indirectPrefix.length - 1];
+          } else if (middleMarker) {
+            personalPrefix = "a";
           } else if (ventive) {
             personalPrefix = "u";
           } else if (preformative) {
@@ -779,7 +780,8 @@ module.exports = ({
     });
   }
   // parse final verb for syllables
-  const syllables = syllableParser(conjugatedVerb, stem);
+  //const syllables = syllableParser(conjugatedVerb, stem);
+  const syllables = syllableParser({ word: conjugatedVerb, stem });
   // removes dash for reduplicated stems
   conjugatedVerb = conjugatedVerb.replace("-", "");
   // writes verb in cuneiforms
